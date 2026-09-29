@@ -1,0 +1,15 @@
+{
+  "name": "nexus-ai-mail-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "googleapis": "^161.0.0",
+    "@azure/msal-node": "^3.8.1",
+    "imapflow": "^1.0.181"
+  }
+}
