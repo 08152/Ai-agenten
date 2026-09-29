@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXUS AI</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  min-height:100vh;
+  background:#050507;
+  color:#fff;
+  font-family:Inter,Arial,sans-serif;
+}
+
+button{
+  border:0;
+  cursor:pointer;
+  color:white;
+}
+
+.app{
+  display:flex;
+  min-height:100vh;
+}
+
+.sidebar{
+  width:250px;
+  background:#09090d;
+  border-right:1px solid #202027;
+  padding:24px 16px;
+}
+
+.logo{
+  font-size:24px;
+  font-weight:900;
+  margin-bottom:35px;
+}
+
+.logo span{
+  color:#8b5cf6;
+}
+
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.nav button{
+  text-align:left;
+  padding:13px 15px;
+  border-radius:12px;
+  background:transparent;
+  color:#aaa;
+  font-size:14px;
+}
+
+.nav button.active,
+.nav button:hover{
+  background:#17131f;
+  color:#fff;
+}
+
+.main{
+  flex:1;
+  padding:30px;
+  overflow:auto;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
+}
+
+.title{
+  font-size:30px;
+  font-weight:900;
+}
+
+.status{
+  padding:8px 13px;
+  border:1px solid #282832;
+  border-radius:999px;
+  color:#aaa;
+  font-size:13px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+.card{
+  background:#0c0c11;
+  border:1px solid #202027;
+  border-radius:18px;
+  padding:20px;
+}
+
+.card h2{
+  font-size:17px;
+  margin-bottom:9px;
+}
+
+.card p{
+  color:#888;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.provider{
+  min-height:180px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.provider-name{
+  font-size:20px;
+  font-weight:800;
+}
+
+.provider-icon{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:#18181f;
+  font-size:21px;
+  margin-bottom:15px;
+}
+
+.connect{
+  width:100%;
+  padding:12px;
+  border-radius:11px;
+  background:#7c3aed;
+  font-weight:700;
+}
+
+.connect:hover{
+  background:#8b5cf6;
+}
+
+.connect.secondary{
+  background:#17171e;
+  border:1px solid #292933;
+}
+
+.agent{
+  grid-column:1/-1;
+}
+
+.agent-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+
+.agent-state{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#aaa;
+  font-size:13px;
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#22c55e;
+}
+
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:18px;
+}
+
+.chip{
+  padding:10px 13px;
+  border-radius:999px;
+  background:#15151b;
+  border:1px solid #292932;
+  color:#aaa;
+}
+
+.chip.active{
+  color:#fff;
+  border-color:#8b5cf6;
+  background:#21152f;
+}
+
+.run{
+  margin-top:18px;
+  padding:13px 18px;
+  border-radius:12px;
+  background:#7c3aed;
+  font-weight:800;
+}
+
+.mail-section{
+  margin-top:20px;
+}
+
+.mail-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:15px;
+}
+
+.mail{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px;
+  background:#101015;
+  border:1px solid #22222a;
+  border-radius:13px;
+}
+
+.mail input{
+  width:18px;
+  height:18px;
+}
+
+.mail-info{
+  flex:1;
+  min-width:0;
+}
+
+.mail-from{
+  font-size:13px;
+  color:#aaa;
+}
+
+.mail-subject{
+  margin-top:4px;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.important{
+  color:#22c55e;
+  font-size:12px;
+}
+
+.unimportant{
+  color:#f87171;
+  font-size:12px;
+}
+
+.log{
+  height:150px;
+  overflow:auto;
+  background:#060608;
+  border:1px solid #1d1d24;
+  border-radius:12px;
+  padding:12px;
+  margin-top:15px;
+  font-family:monospace;
+  font-size:12px;
+  color:#8d8d98;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:#000b;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  width:min(480px,100%);
+  background:#0d0d12;
+  border:1px solid #292932;
+  border-radius:20px;
+  padding:24px;
+}
+
+.modal-box h2{
+  margin-bottom:10px;
+}
+
+.modal-box p{
+  color:#888;
+  font-size:13px;
+  margin-bottom:18px;
+}
+
+.field{
+  width:100%;
+  padding:13px;
+  border-radius:11px;
+  border:1px solid #292932;
+  background:#07070a;
+  color:#fff;
+  margin-bottom:10px;
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+}
+
+.actions button{
+  flex:1;
+  padding:12px;
+  border-radius:11px;
+}
+
+.cancel{
+  background:#18181e;
+}
+
+.confirm{
+  background:#7c3aed;
+}
+
+@media(max-width:900px){
+  .sidebar{
+    display:none;
+  }
+
+  .main{
+    padding:18px;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+  <div class="logo">NEXUS<span>AI</span></div>
+
+  <div class="nav">
+    <button class="active">Mail Agent</button>
+    <button>Research Agent</button>
+    <button>Code Agent</button>
+    <button>Creative Agent</button>
+  </div>
+</aside>
+
+<main class="main">
+
+<div class="header">
+  <div class="title">Mail Agent</div>
+  <div class="status" id="status">Nicht verbunden</div>
+</div>
+
+<div class="grid">
+
+<div class="card provider">
+  <div>
+    <div class="provider-icon">G</div>
+    <div class="provider-name">Gmail</div>
+    <p>Verbindung über Google OAuth.</p>
+  </div>
+
+  <button class="connect" onclick="connectGmail()">
+    Mit Gmail verbinden
+  </button>
+</div>
+
+<div class="card provider">
+  <div>
+    <div class="provider-icon">O</div>
+    <div class="provider-name">Outlook</div>
+    <p>Verbindung über Microsoft OAuth.</p>
+  </div>
+
+  <button class="connect" onclick="connectOutlook()">
+    Mit Outlook verbinden
+  </button>
+</div>
+
+<div class="card provider">
+  <div>
+    <div class="provider-icon">P</div>
+    <div class="provider-name">Proton Mail</div>
+    <p>Verbindung über IMAP/Bridge-Konfiguration.</p>
+  </div>
+
+  <button class="connect" onclick="openProton()">
+    Proton verbinden
+  </button>
+</div>
+
+<div class="card agent">
+
+<div class="agent-top">
+  <div>
+    <h2>Mail Agent</h2>
+    <p>Analysiert deine Inbox anhand deiner ausgewählten Kriterien.</p>
+  </div>
+
+  <div class="agent-state">
+    <span class="dot"></span>
+    Bereit
+  </div>
+</div>
+
+<div class="controls">
+
+<button class="chip active" data-rule="family">
+  Familie
+</button>
+
+<button class="chip active" data-rule="school">
+  Schule
+</button>
+
+<button class="chip" data-rule="orders">
+  Bestellungen
+</button>
+
+<button class="chip" data-rule="appointments">
+  Termine
+</button>
+
+<button class="chip" data-rule="security">
+  Sicherheit
+</button>
+
+<button class="chip" data-rule="newsletters">
+  Newsletter löschen
+</button>
+
+</div>
+
+<button class="run" onclick="runAgent()">
+  Agent starten
+</button>
+
+<div class="mail-section">
+
+<h2>Posteingang</h2>
+
+<div id="mailList" class="mail-list">
+  <div class="mail">
+    <div class="mail-info">
+      <div class="mail-from">Noch keine Verbindung</div>
+      <div class="mail-subject">
+        Verbinde zuerst einen Mailanbieter.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="log" id="log">
+NEXUS AI Mail Agent gestartet...
+</div>
+
+</div>
+
+</div>
+
+</main>
+</div>
+
+<div class="modal" id="protonModal">
+
+<div class="modal-box">
+
+<h2>Proton Mail</h2>
+
+<p>
+Für Proton wird eine sichere IMAP/Bridge-Verbindung verwendet.
+Kein Proton-Passwort wird im Browser gespeichert.
+</p>
+
+<input
+  id="protonHost"
+  class="field"
+  placeholder="IMAP-Host"
+/>
+
+<input
+  id="protonPort"
+  class="field"
+  placeholder="Port"
+  value="993"
+/>
+
+<input
+  id="protonUser"
+  class="field"
+  placeholder="E-Mail-Adresse"
+/>
+
+<div class="actions">
+
+<button class="cancel" onclick="closeProton()">
+  Abbrechen
+</button>
+
+<button class="confirm" onclick="connectProton()">
+  Verbinden
+</button>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+let mails = [];
+
+function log(text){
+  const el = document.getElementById("log");
+
+  const time =
+    new Date().toLocaleTimeString();
+
+  el.innerHTML +=
+    `<div>[${time}] ${text}</div>`;
+
+  el.scrollTop = el.scrollHeight;
+}
+
+function connectGmail(){
+  location.href="/auth/gmail";
+}
+
+function connectOutlook(){
+  location.href="/auth/outlook";
+}
+
+function openProton(){
+  document
+    .getElementById("protonModal")
+    .classList.add("show");
+}
+
+function closeProton(){
+  document
+    .getElementById("protonModal")
+    .classList.remove("show");
+}
+
+async function connectProton(){
+
+  const host =
+    document.getElementById("protonHost").value.trim();
+
+  const port =
+    document.getElementById("protonPort").value.trim();
+
+  const user =
+    document.getElementById("protonUser").value.trim();
+
+  if(!host || !user){
+    alert("Host und E-Mail-Adresse fehlen.");
+    return;
+  }
+
+  const response =
+    await fetch("/api/proton/connect",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        host,
+        port,
+        user
+      })
+    });
+
+  const data=await response.json();
+
+  if(!response.ok){
+    alert(data.error || "Verbindung fehlgeschlagen.");
+    return;
+  }
+
+  closeProton();
+
+  log("Proton Mail verbunden.");
+
+  await loadMails();
+}
+
+async function loadMails(){
+
+  const status =
+    await fetch("/api/status")
+      .then(r=>r.json());
+
+  if(!status.loggedIn){
+    document.getElementById("status")
+      .textContent="Nicht verbunden";
+    return;
+  }
+
+  document.getElementById("status")
+    .textContent =
+    `${status.account.provider} · ${status.account.email}`;
+
+  let endpoint="";
+
+  if(status.account.provider==="Gmail"){
+    endpoint="/api/mail";
+  }
+
+  if(status.account.provider==="Outlook"){
+    endpoint="/api/outlook/mail";
+  }
+
+  if(status.account.provider==="Proton"){
+    endpoint="/api/proton/mail";
+  }
+
+  if(!endpoint) return;
+
+  const response =
+    await fetch(endpoint);
+
+  const data =
+    await response.json();
+
+  if(!response.ok){
+    log(data.error || "Fehler beim Laden.");
+    return;
+  }
+
+  mails=data;
+
+  renderMails();
+
+  log(`${mails.length} Mails geladen.`);
+}
+
+function renderMails(){
+
+  const list =
+    document.getElementById("mailList");
+
+  if(!mails.length){
+    list.innerHTML=
+      `<div class="mail">
+        Keine Mails gefunden.
+      </div>`;
+    return;
+  }
+
+  list.innerHTML="";
+
+  mails.forEach((mail,index)=>{
+
+    list.innerHTML += `
+      <div class="mail">
+        <input
+          type="checkbox"
+          class="mailCheck"
+          data-index="${index}"
+        >
+
+        <div class="mail-info">
+
+          <div class="mail-from">
+            ${escapeHtml(mail.from)}
+          </div>
+
+          <div class="mail-subject">
+            ${escapeHtml(mail.subject || "(Kein Betreff)")}
+          </div>
+
+        </div>
+
+        <div>
+          ${mail.unread
+            ? '<span class="important">NEU</span>'
+            : ''}
+        </div>
+
+      </div>
+    `;
+  });
+}
+
+function escapeHtml(value){
+
+  return String(value || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+async function runAgent(){
+
+  if(!mails.length){
+    log("Keine Mails vorhanden.");
+    return;
+  }
+
+  log("Mail Agent analysiert Inbox...");
+
+  const result =
+    await fetch("/api/agent/analyze",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        mails
+      })
+    }).then(r=>r.json());
+
+  log(
+    `${result.important.length} wichtige Mails erkannt.`
+  );
+
+  log(
+    `${result.unimportant.length} unwichtige Mails erkannt.`
+  );
+
+  if(result.unimportant.length){
+
+    const ids =
+      result.unimportant.map(m=>m.id);
+
+    const provider =
+      (await fetch("/api/status")
+        .then(r=>r.json()))
+        .account.provider;
+
+    let endpoint;
+
+    if(provider==="Gmail"){
+      endpoint="/api/mail/delete";
+    }
+
+    if(provider==="Outlook"){
+      endpoint="/api/outlook/delete";
+    }
+
+    if(provider==="Proton"){
+      endpoint="/api/proton/delete";
+    }
+
+    if(!endpoint){
+      log("Löschen für diesen Anbieter nicht verfügbar.");
+      return;
+    }
+
+    const confirmed =
+      confirm(
+        `${ids.length} als unwichtig erkannte Mails in den Papierkorb verschieben?`
+      );
+
+    if(!confirmed){
+      log("Löschen abgebrochen.");
+      return;
+    }
+
+    const response =
+      await fetch(endpoint,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({ids})
+      });
+
+    const data =
+      await response.json();
+
+    if(!response.ok){
+      log(data.error || "Löschen fehlgeschlagen.");
+      return;
+    }
+
+    log(
+      `${data.deleted || ids.length} Mails in den Papierkorb verschoben.`
+    );
+
+    await loadMails();
+  }
+}
+
+document
+  .querySelectorAll(".chip")
+  .forEach(button=>{
+
+    button.addEventListener("click",()=>{
+      button.classList.toggle("active");
+    });
+
+  });
+
+loadMails();
+
+</script>
+
+</body>
+</html>
